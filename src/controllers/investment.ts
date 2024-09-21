@@ -1,8 +1,20 @@
 import { Request, Response } from "express";
 import * as yup from "yup";
-import { validateFields, convertToObject } from "../utils";
+import { fromUnixTime } from "date-fns";
+import {
+  validateFields,
+  convertToObject,
+  groupByDay,
+  groupByWeek,
+  groupByMonth,
+  groupByYear,
+} from "../utils";
 import { ErrorResponse, SuccessResponse, SanitizedInvestment } from "../types";
-import { getInvestmentsService, doInvestmentService } from "../services";
+import {
+  getInvestmentsService,
+  doInvestmentService,
+  getInvestmentsMetricsService,
+} from "../services";
 import { Investment } from "../models";
 
 export const getInvestmentsController = async (
@@ -50,4 +62,65 @@ export const doInvestmentController = async (
     data: SanitizedInvestment;
   }>;
   return res.status(code).json(data);
+};
+
+export const getInvestmentsMetricsController = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { from, to } = req.params;
+  const { groupBy } = req.query;
+
+  const dateSchema = yup
+    .object()
+    .shape({
+      from: yup.string().required("from date is required"),
+      to: yup.string().required("to date is required"),
+    })
+    .test(
+      "is-valid-range",
+      "The to date must be greater than or equal to the from date",
+      function (value) {
+        const { from, to } = value;
+        return parseInt(to) >= parseInt(from);
+      }
+    );
+
+  const validationResponse = await validateFields(dateSchema, { from, to });
+
+  if (validationResponse?.result) {
+    return res.status(400).json(convertToObject(validationResponse));
+  }
+
+  const fromDate = fromUnixTime(parseInt(from));
+  const toDate = fromUnixTime(parseInt(to));
+
+  const result = await getInvestmentsMetricsService(fromDate, toDate);
+
+  if (result.error) {
+    const { code, errorMessage } = result as ErrorResponse;
+    return res.status(code).json({ error: errorMessage });
+  }
+
+  const { data, code } = result as SuccessResponse<{ data: Investment[] }>;
+
+  let groupedData;
+  switch (groupBy) {
+    case "day":
+      groupedData = groupByDay(data);
+      break;
+    case "week":
+      groupedData = groupByWeek(data);
+      break;
+    case "month":
+      groupedData = groupByMonth(data);
+      break;
+    case "year":
+      groupedData = groupByYear(data);
+      break;
+    default:
+      groupedData = groupByMonth(data);
+  }
+
+  return res.status(code).json(groupedData);
 };

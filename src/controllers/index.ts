@@ -1,4 +1,14 @@
 import { registerController, tokenController } from "./users";
-import { getInvestmentsController, doInvestmentController } from "./investment";
+import {
+  getInvestmentsController,
+  doInvestmentController,
+  getInvestmentsMetricsController,
+} from "./investment";
 
-export { registerController, tokenController, getInvestmentsController, doInvestmentController };
+export {
+  registerController,
+  tokenController,
+  getInvestmentsController,
+  doInvestmentController,
+  getInvestmentsMetricsController,
+};
