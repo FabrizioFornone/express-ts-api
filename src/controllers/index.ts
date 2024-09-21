@@ -1,3 +1,3 @@
-import { registerController } from "./users";
+import { registerController, tokenController } from "./users";
 
-export { registerController };
+export { registerController, tokenController };

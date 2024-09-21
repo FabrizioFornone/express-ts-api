@@ -1,3 +1,3 @@
-import { registerService } from "./users";
+import { registerService, tokenService } from "./users";
 
-export { registerService };
+export { registerService, tokenService };

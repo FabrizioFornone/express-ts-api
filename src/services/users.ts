@@ -1,6 +1,19 @@
 import bcrypt from "bcryptjs";
-import User from "../models/user";
+import crypto from "crypto";
+import { User, Token } from "../models";
 import { ErrorResponse, SuccessResponse } from "../types";
+
+const createToken = async (accessLevel: string): Promise<string> => {
+  const token: string = crypto.randomBytes(32).toString("hex");
+
+  await Token.create({
+    token,
+    access_level: accessLevel,
+    used: false,
+  });
+
+  return token;
+};
 
 export const registerService = async (
   username: string,
@@ -35,6 +48,57 @@ export const registerService = async (
       error: true,
       code: 500,
       errorMessage: "Error creating user",
+    };
+  }
+};
+
+export const tokenService = async (
+  username: string | undefined,
+  password: string | undefined
+): Promise<SuccessResponse<{ token: string }> | ErrorResponse> => {
+  if (!username || !password) {
+    const token: string = await createToken("read");
+    return {
+      code: 200,
+      data: { token },
+    };
+  }
+
+  try {
+    const user: User | null = await User.findOne({ where: { username } });
+
+    if (!user) {
+      return {
+        error: true,
+        code: 401,
+        errorMessage: "Invalid credentials",
+      };
+    }
+
+    const passwordMatch: boolean = await bcrypt.compare(
+      password,
+      user.hashed_password
+    );
+
+    if (!passwordMatch) {
+      return {
+        error: true,
+        code: 401,
+        errorMessage: "Invalid credentials",
+      };
+    }
+
+    const token: string = await createToken("read_write");
+
+    return {
+      code: 200,
+      data: { token },
+    };
+  } catch (error: unknown) {
+    return {
+      error: true,
+      code: 500,
+      errorMessage: "Error logging in",
     };
   }
 };
