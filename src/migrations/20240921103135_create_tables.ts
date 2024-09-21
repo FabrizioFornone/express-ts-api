@@ -10,12 +10,6 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.schema.createTable("investments", function (table) {
     table.increments("investment_id").primary();
-    table
-      .integer("user_id")
-      .unsigned()
-      .references("user_id")
-      .inTable("users")
-      .onDelete("CASCADE");
     table.date("creation_date").notNullable();
     table.date("confirmation_date");
     table.decimal("value", 15, 2).notNullable();
