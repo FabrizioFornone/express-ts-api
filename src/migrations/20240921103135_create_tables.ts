@@ -26,12 +26,6 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable("authorization_tokens", function (table) {
     table.increments("token_id").primary();
     table.string("token").notNullable().unique();
-    table
-      .integer("user_id")
-      .unsigned()
-      .references("user_id")
-      .inTable("users")
-      .onDelete("CASCADE");
     table.enu("access_level", ["read", "read_write"]).notNullable();
     table.boolean("used").defaultTo(false);
     table.timestamps(true, true);

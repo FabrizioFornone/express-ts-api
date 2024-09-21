@@ -12,4 +12,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-ENTRYPOINT ["npm", "run", "start"]
+ENTRYPOINT ["npx", "nodemon", "-L", "--watch", "src", "src/index.ts"]
