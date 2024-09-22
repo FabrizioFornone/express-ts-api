@@ -4,3 +4,8 @@ export enum PeriodGroupBy {
   MONTH = "month",
   YEAR = "year",
 }
+
+export enum AccessLevel {
+  READ = "read",
+  READ_WRITE = "read_write",
+}

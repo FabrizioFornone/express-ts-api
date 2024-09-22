@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Token } from "../models";
+import { AccessLevel } from "../types/enums";
 
 const authRead = async (
   req: Request,
@@ -54,7 +55,7 @@ const authReadWrite = async (
       return res.status(403).json({ message: "Token already used" });
     }
 
-    if (tokenRecord.access_level === "read_write") {
+    if (tokenRecord.access_level === AccessLevel.READ_WRITE) {
       // Set token as used
       tokenRecord.used = true;
       await tokenRecord.save();

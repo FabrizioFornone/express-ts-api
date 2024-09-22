@@ -1,10 +1,11 @@
 import { Model, DataTypes } from "sequelize";
 import { sequelize } from "../config/database";
+import { AccessLevel } from "../types/enums";
 
 class Token extends Model {
   public token_id!: number;
   public token!: string;
-  public access_level!: "read" | "read_write";
+  public access_level!: AccessLevel.READ | AccessLevel.READ_WRITE;
   public used!: boolean;
   public created_at!: Date;
   public updated_at!: Date;
@@ -23,7 +24,7 @@ Token.init(
       unique: true,
     },
     access_level: {
-      type: DataTypes.ENUM("read", "read_write"),
+      type: DataTypes.ENUM(AccessLevel.READ, AccessLevel.READ_WRITE),
       allowNull: false,
     },
     used: {
