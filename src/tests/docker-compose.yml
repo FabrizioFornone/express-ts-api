@@ -1,0 +1,37 @@
+version: "3.8"
+services:
+  test-db:
+    container_name: mysql-test-db
+    image: mysql:5.7
+    ports:
+      - "3307:3306" # Useing a different port to avoid conflicts with the development database
+    environment:
+      MYSQL_DATABASE: "test_db"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+      MYSQL_ROOT_PASSWORD: "password"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "--password=password",
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - test-db-data:/var/lib/mysql
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+volumes:
+  test-db-data:

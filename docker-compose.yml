@@ -1,0 +1,54 @@
+version: "3.8"
+services:
+  app:
+    container_name: express-app
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/usr/src/app
+      # prevent overwriting the node_modules directory inside the container with the node_modules directory from the host
+      - /usr/src/app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  mysql:
+    container_name: mysql-express-app
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: "mydb"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+      MYSQL_ROOT_PASSWORD: "password"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "--password=password",
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  db-data:
