@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { User, Token } from "../models";
 import { ErrorResponse, SuccessResponse } from "../types";
+import { AccessLevel } from "../types/enums";
 
 const createToken = async (accessLevel: string): Promise<string> => {
   const token: string = crypto.randomBytes(32).toString("hex");
@@ -57,9 +58,9 @@ export const tokenService = async (
   password: string | undefined
 ): Promise<SuccessResponse<{ token: string }> | ErrorResponse> => {
   if (!username || !password) {
-    const token: string = await createToken("read");
+    const token: string = await createToken(AccessLevel.READ);
     return {
-      code: 200,
+      code: 201,
       data: { token },
     };
   }
@@ -88,10 +89,10 @@ export const tokenService = async (
       };
     }
 
-    const token: string = await createToken("read_write");
+    const token: string = await createToken(AccessLevel.READ_WRITE);
 
     return {
-      code: 200,
+      code: 201,
       data: { token },
     };
   } catch (error: unknown) {

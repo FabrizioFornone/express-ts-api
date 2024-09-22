@@ -37,13 +37,13 @@ describe("Endpoints", () => {
         "Basic " +
           Buffer.from("testuserr@gmail.com:password123").toString("base64")
       );
-    expect(res.statusCode).toEqual(200);
+    expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty("token");
   });
 
   it("should return a read token for valid credentials", async () => {
     const res = await request(app).post("/api/user/token");
-    expect(res.statusCode).toEqual(200);
+    expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty("token");
   });
 

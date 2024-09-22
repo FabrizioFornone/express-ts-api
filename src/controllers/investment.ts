@@ -16,7 +16,52 @@ import {
   getInvestmentsMetricsService,
 } from "../services";
 import { Investment } from "../models";
+import { PeriodGroupBy } from "../types/enums";
 
+/**
+ * @swagger
+ * /investment:
+ *   get:
+ *     summary: Get all investments
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of investments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   investment_id:
+ *                     type: integer
+ *                   creation_date:
+ *                     type: string
+ *                     format: date-time
+ *                   confirmation_date:
+ *                     type: string
+ *                     format: date-time
+ *                     nullable: true
+ *                   value:
+ *                     type: number
+ *                     format: float
+ *                   annual_rate:
+ *                     type: number
+ *                     format: float
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export const getInvestmentsController = async (
   req: Request,
   res: Response
@@ -32,6 +77,52 @@ export const getInvestmentsController = async (
   return res.status(code).json(data);
 };
 
+/**
+ * @swagger
+ * /investment:
+ *   post:
+ *     summary: Create a new investment
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - value
+ *               - annual_rate
+ *             properties:
+ *               value:
+ *                 type: string
+ *                 example: "1000"
+ *               annual_rate:
+ *                 type: string
+ *                 example: "5.5"
+ *     responses:
+ *       201:
+ *         description: Investment created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 value:
+ *                   type: string
+ *                 annual_rate:
+ *                   type: string
+ *                 creation_date:
+ *                   type: string
+ *                   format: date-time
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export const doInvestmentController = async (
   req: Request & { username?: string },
   res: Response
@@ -64,6 +155,48 @@ export const doInvestmentController = async (
   return res.status(code).json(data);
 };
 
+/**
+ * @swagger
+ * /investment/metrics/{from}/{to}:
+ *   get:
+ *     summary: Get investment metrics
+ *     tags: [Investments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: from
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Start date in Unix time
+ *       - in: path
+ *         name: to
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: End date in Unix time
+ *       - in: query
+ *         name: groupBy
+ *         schema:
+ *           type: string
+ *           enum: [day, week, month, year]
+ *         required: false
+ *         description: Group by period
+ *     responses:
+ *       200:
+ *         description: Investment metrics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export const getInvestmentsMetricsController = async (
   req: Request,
   res: Response
@@ -106,16 +239,16 @@ export const getInvestmentsMetricsController = async (
 
   let groupedData;
   switch (groupBy) {
-    case "day":
+    case PeriodGroupBy.DAY:
       groupedData = groupByDay(data);
       break;
-    case "week":
+    case PeriodGroupBy.WEEK:
       groupedData = groupByWeek(data);
       break;
-    case "month":
+    case PeriodGroupBy.MONTH:
       groupedData = groupByMonth(data);
       break;
-    case "year":
+    case PeriodGroupBy.YEAR:
       groupedData = groupByYear(data);
       break;
     default:

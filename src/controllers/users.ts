@@ -6,6 +6,47 @@ import { ErrorResponse, SuccessResponse } from "../types";
 
 import * as yup from "yup";
 
+/**
+ * @swagger
+ * /user/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: johndoe
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: Password123!
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 username:
+ *                   type: string
+ *                   example: johndoe
+ *       400:
+ *         description: Bad request. Validation error for the input fields.
+ *       409:
+ *         description: Username already exists.
+ *       500:
+ *         description: Internal server error.
+ */
 export const registerController = async (
   req: Request,
   res: Response
@@ -39,6 +80,30 @@ export const registerController = async (
   return res.status(code).json(data);
 };
 
+/**
+ * @swagger
+ * /user/token:
+ *   post:
+ *     summary: Generate a token for a user
+ *     tags: [Users]
+ *     security:
+ *       - basicAuth: []
+ *     responses:
+ *       201:
+ *         description: Token generated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   example: abc123token
+ *       401:
+ *         description: Invalid credentials.
+ *       500:
+ *         description: Internal server error.
+ */
 export const tokenController = async (
   req: Request,
   res: Response
