@@ -59,7 +59,7 @@ export const tokenService = async (
   if (!username || !password) {
     const token: string = await createToken("read");
     return {
-      code: 200,
+      code: 201,
       data: { token },
     };
   }
@@ -91,7 +91,7 @@ export const tokenService = async (
     const token: string = await createToken("read_write");
 
     return {
-      code: 200,
+      code: 201,
       data: { token },
     };
   } catch (error: unknown) {
