@@ -17,7 +17,7 @@ docker-compose up --build
 When the server is available run for the first time:
 
 ```
-npm run init-db
+npm run db-init
 ```
 
 It will run the migrations.
