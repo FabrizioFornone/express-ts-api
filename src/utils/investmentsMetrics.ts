@@ -1,6 +1,7 @@
 import { Investment } from "../models";
 import { format, startOfWeek } from "date-fns";
 import { InvestmentsGroupedMetrics } from "../types";
+import { PeriodGroupBy } from "../types/enums";
 
 export const groupInvestmentsMetricsByPeriod = (
   data: { data: Investment[] },
@@ -9,16 +10,16 @@ export const groupInvestmentsMetricsByPeriod = (
   const grouped = data.data.reduce((acc, investment) => {
     let key;
     switch (period) {
-      case "day":
+      case PeriodGroupBy.DAY:
         key = format(investment.creation_date as Date, "yyyy-MM-dd");
         break;
-      case "week":
+      case PeriodGroupBy.WEEK:
         key = format(startOfWeek(investment.creation_date as Date), "yyyy-ww");
         break;
-      case "month":
+      case PeriodGroupBy.MONTH:
         key = format(investment.creation_date as Date, "yyyy-MM");
         break;
-      case "year":
+      case PeriodGroupBy.YEAR:
         key = format(investment.creation_date as Date, "yyyy");
         break;
       default:
