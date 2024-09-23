@@ -5,7 +5,7 @@
 First of all:
 
 ```
-npm run i
+npm i
 ```
 
 To start the app and the database, run the following command in the root directory:
