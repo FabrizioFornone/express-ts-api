@@ -4,10 +4,7 @@ import { fromUnixTime } from "date-fns";
 import {
   validateFields,
   convertToObject,
-  groupByDay,
-  groupByWeek,
-  groupByMonth,
-  groupByYear,
+  groupInvestmentsMetricsByPeriod,
 } from "../utils";
 import { ErrorResponse, SuccessResponse, SanitizedInvestment } from "../types";
 import {
@@ -17,10 +14,11 @@ import {
 } from "../services";
 import { Investment } from "../models";
 import { PeriodGroupBy } from "../types/enums";
+import { InvestmentsGroupedMetrics } from "../types";
 
 /**
  * @swagger
- * /investment:
+ * /investments:
  *   get:
  *     summary: Get all investments
  *     tags: [Investments]
@@ -46,11 +44,11 @@ import { PeriodGroupBy } from "../types/enums";
  *                     format: date-time
  *                     nullable: true
  *                   value:
- *                     type: number
- *                     format: float
+ *                     type: string
+ *                     example: "1000"
  *                   annual_rate:
- *                     type: number
- *                     format: float
+ *                     type: string
+ *                     example: "5.5"
  *                   created_at:
  *                     type: string
  *                     format: date-time
@@ -58,7 +56,9 @@ import { PeriodGroupBy } from "../types/enums";
  *                     type: string
  *                     format: date-time
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized. No token provided or invalid token.
+ *       403:
+ *         description: Forbidden. Token already used or insufficient access level.
  *       500:
  *         description: Internal server error
  */
@@ -79,7 +79,7 @@ export const getInvestmentsController = async (
 
 /**
  * @swagger
- * /investment:
+ * /investments:
  *   post:
  *     summary: Create a new investment
  *     tags: [Investments]
@@ -119,7 +119,9 @@ export const getInvestmentsController = async (
  *       400:
  *         description: Bad request
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized. No token provided or invalid token.
+ *       403:
+ *         description: Forbidden. Token already used or insufficient access level.
  *       500:
  *         description: Internal server error
  */
@@ -157,20 +159,20 @@ export const doInvestmentController = async (
 
 /**
  * @swagger
- * /investment/metrics/{from}/{to}:
+ * /investments/metrics:
  *   get:
  *     summary: Get investment metrics
  *     tags: [Investments]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: from
  *         schema:
  *           type: string
  *         required: true
  *         description: Start date in Unix time
- *       - in: path
+ *       - in: query
  *         name: to
  *         schema:
  *           type: string
@@ -190,10 +192,41 @@ export const doInvestmentController = async (
  *           application/json:
  *             schema:
  *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         investment_id:
+ *                           type: integer
+ *                         creation_date:
+ *                           type: string
+ *                           format: date-time
+ *                         confirmation_date:
+ *                           type: string
+ *                           format: date-time
+ *                           nullable: true
+ *                         value:
+ *                           type: string
+ *                           example: "1000"
+ *                         annual_rate:
+ *                           type: string
+ *                           example: "5.5"
+ *                         created_at:
+ *                           type: string
+ *                           format: date-time
+ *                         updated_at:
+ *                           type: string
+ *                           format: date-time
  *       400:
  *         description: Bad request
  *       401:
- *         description: Unauthorized
+ *         description: Unauthorized. No token provided or invalid token.
+ *       403:
+ *         description: Forbidden. Token already used or insufficient access level.
  *       500:
  *         description: Internal server error
  */
@@ -201,14 +234,25 @@ export const getInvestmentsMetricsController = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { from, to } = req.params;
-  const { groupBy } = req.query;
+  const { from, to, groupBy: groupByPeriod } = req.query;
 
   const dateSchema = yup
     .object()
     .shape({
       from: yup.string().required("from date is required"),
       to: yup.string().required("to date is required"),
+      groupBy: yup
+        .string()
+        .oneOf(
+          [
+            PeriodGroupBy.DAY,
+            PeriodGroupBy.WEEK,
+            PeriodGroupBy.MONTH,
+            PeriodGroupBy.YEAR,
+          ],
+          "Invalid groupBy value"
+        )
+        .notRequired(),
     })
     .test(
       "is-valid-range",
@@ -225,8 +269,8 @@ export const getInvestmentsMetricsController = async (
     return res.status(400).json(convertToObject(validationResponse));
   }
 
-  const fromDate = fromUnixTime(parseInt(from));
-  const toDate = fromUnixTime(parseInt(to));
+  const fromDate = fromUnixTime(parseInt(from as string));
+  const toDate = fromUnixTime(parseInt(to as string));
 
   const result = await getInvestmentsMetricsService(fromDate, toDate);
 
@@ -237,23 +281,11 @@ export const getInvestmentsMetricsController = async (
 
   const { data, code } = result as SuccessResponse<{ data: Investment[] }>;
 
-  let groupedData;
-  switch (groupBy) {
-    case PeriodGroupBy.DAY:
-      groupedData = groupByDay(data);
-      break;
-    case PeriodGroupBy.WEEK:
-      groupedData = groupByWeek(data);
-      break;
-    case PeriodGroupBy.MONTH:
-      groupedData = groupByMonth(data);
-      break;
-    case PeriodGroupBy.YEAR:
-      groupedData = groupByYear(data);
-      break;
-    default:
-      groupedData = groupByMonth(data);
-  }
+  const groupedMetrics: InvestmentsGroupedMetrics =
+    groupInvestmentsMetricsByPeriod(
+      data,
+      (groupByPeriod as string) || PeriodGroupBy.MONTH
+    );
 
-  return res.status(code).json(groupedData);
+  return res.status(code).json(groupedMetrics);
 };

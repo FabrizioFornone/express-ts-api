@@ -1,4 +1,9 @@
 import { ErrorResponse, SuccessResponse } from "./serviceResponse";
-import { SanitizedInvestment } from "./investments";
+import { SanitizedInvestment, InvestmentsGroupedMetrics } from "./investments";
 
-export { ErrorResponse, SuccessResponse, SanitizedInvestment };
+export {
+  ErrorResponse,
+  SuccessResponse,
+  SanitizedInvestment,
+  InvestmentsGroupedMetrics,
+};
