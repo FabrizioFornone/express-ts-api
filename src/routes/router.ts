@@ -7,7 +7,7 @@ import { investmentRouter } from "./investmentRouter";
 export const router = express.Router();
 
 // user routes collection
-router.use("/user", userRouter);
+router.use("/users", userRouter);
 
 // investment routes collection
-router.use("/investment", investmentRouter);
+router.use("/investments", investmentRouter);

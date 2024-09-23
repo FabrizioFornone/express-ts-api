@@ -11,7 +11,7 @@ const investmentRouter = Router();
 investmentRouter.get("/", authRead, getInvestmentsController);
 investmentRouter.post("/", authReadWrite, doInvestmentController);
 investmentRouter.get(
-  "/metrics/:from/:to/",
+  "/metrics",
   authRead,
   getInvestmentsMetricsController
 );

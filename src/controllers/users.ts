@@ -8,7 +8,7 @@ import * as yup from "yup";
 
 /**
  * @swagger
- * /user/register:
+ * /users/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Users]
@@ -82,7 +82,7 @@ export const registerController = async (
 
 /**
  * @swagger
- * /user/token:
+ * /users/token:
  *   post:
  *     summary: Generate a token for a user
  *     tags: [Users]
