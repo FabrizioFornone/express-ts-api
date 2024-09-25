@@ -25,13 +25,14 @@ export const getInvestmentsService = async (): Promise<
 
 export const doInvestmentService = async (
   value: string,
-  annual_rate: string
+  annual_rate: string,
+  formattedDate: Date
 ): Promise<SuccessResponse<{ data: SanitizedInvestment }> | ErrorResponse> => {
   try {
     const investment = await Investment.create({
       value: parseFloat(value),
       annual_rate: parseFloat(annual_rate),
-      creation_date: new Date(),
+      creation_date: formattedDate,
     });
 
     const sanitizedInvestiment: SanitizedInvestment = {
