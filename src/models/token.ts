@@ -43,9 +43,7 @@ Token.init(
   {
     tableName: "authorization_tokens",
     sequelize,
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
+    timestamps: false,
   }
 );
 

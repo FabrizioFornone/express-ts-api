@@ -99,7 +99,7 @@ export const tokenService = async (
     return {
       error: true,
       code: 500,
-      errorMessage: "Error logging in",
+      errorMessage: "Error generating token",
     };
   }
 };

@@ -101,6 +101,9 @@ export const getInvestmentsController = async (
  *               annual_rate:
  *                 type: string
  *                 example: "5.5"
+ *               creation_date:
+ *                type: string
+ *                example: "1727253312"
  *     responses:
  *       201:
  *         description: Investment created successfully
@@ -134,6 +137,7 @@ export const doInvestmentController = async (
   const registerSchema = yup.object().shape({
     value: yup.string().required("value is required"),
     annual_rate: yup.string().required("annual_rate is required"),
+    creation_date: yup.string().required("creation_date is required"),
   });
 
   const validationResponse = await validateFields(registerSchema, body);
@@ -142,9 +146,15 @@ export const doInvestmentController = async (
     return res.status(400).json(convertToObject(validationResponse));
   }
 
-  const { value, annual_rate }: { value: string; annual_rate: string } = body;
+  const {
+    value,
+    annual_rate,
+    creation_date,
+  }: { value: string; annual_rate: string; creation_date: string } = body;
 
-  const result = await doInvestmentService(value, annual_rate);
+  const formattedDate = fromUnixTime(parseInt(creation_date as string));
+
+  const result = await doInvestmentService(value, annual_rate, formattedDate);
 
   if (result.error) {
     const { code, errorMessage } = result as ErrorResponse;
