@@ -7,8 +7,8 @@
     "start": "ts-node src/index.ts",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
-    "db-init": "npx knex migrate:latest",
-    "db-down": "npx knex migrate:down",
+    "db-init": "cross-env NODE_ENV=local npx knex migrate:latest",
+    "db-down": "cross-env NODE_ENV=local npx knex migrate:down",
     "test": "cross-env NODE_ENV=test jest --watchAll=false"
   },
   "keywords": [],

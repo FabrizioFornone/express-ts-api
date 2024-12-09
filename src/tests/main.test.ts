@@ -4,7 +4,7 @@ import { databaseConnection } from "../config/database";
 import knex from "knex";
 import knexConfig from "../../knexfile";
 
-const db = knex(knexConfig.development);
+const db = knex(knexConfig);
 
 beforeAll(async () => {
   await databaseConnection();
